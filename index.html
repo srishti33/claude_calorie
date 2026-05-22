@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Life — Calorie Quest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --sky1:#1a0533;--sky2:#2d1b69;--sky3:#ff6b35;--sky4:#87ceeb;
+  --card:#ffffff18;--cardhov:#ffffff28;--border:#ffffff22;--border2:#ffffff44;
+  --text:#fff;--text2:rgba(255,255,255,.75);--text3:rgba(255,255,255,.45);
+  --green:#22c55e;--greenb:rgba(34,197,94,.18);--greenbr:rgba(34,197,94,.4);
+  --red:#f97316;--redb:rgba(249,115,22,.18);--redbr:rgba(249,115,22,.4);
+  --yellow:#fde047;--yellowb:rgba(253,224,71,.15);--yellowbr:rgba(253,224,71,.35);
+  --accent:#a78bfa;
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Nunito',sans-serif;
+  background:linear-gradient(160deg,var(--sky1) 0%,var(--sky2) 50%,#1a0533 100%);
+  min-height:100vh;color:var(--text);overflow-x:hidden;
+  transition:background 2s ease;cursor:default;
+}
+
+/* SKY BACKGROUNDS per time-of-day */
+body.dawn{background:linear-gradient(160deg,#1a0533 0%,#6b21a8 30%,#f97316 65%,#fde68a 100%)}
+body.morning{background:linear-gradient(160deg,#0ea5e9 0%,#38bdf8 40%,#bae6fd 100%)}
+body.afternoon{background:linear-gradient(160deg,#0284c7 0%,#0ea5e9 50%,#7dd3fc 100%)}
+body.evening{background:linear-gradient(160deg,#1e1b4b 0%,#7c3aed 30%,#f97316 65%,#fde68a 100%)}
+body.night{background:linear-gradient(160deg,#020617 0%,#0f172a 50%,#1e1b4b 100%)}
+
+/* STARS */
+#stars{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:hidden}
+.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--d,2s) ease-in-out infinite alternate}
+@keyframes twinkle{from{opacity:.1;transform:scale(1)}to{opacity:.9;transform:scale(1.4)}}
+
+/* SUN/MOON */
+#celestial{position:fixed;top:40px;right:60px;width:70px;height:70px;border-radius:50%;z-index:1;transition:all 2s ease;pointer-events:none}
+#celestial.sun{background:radial-gradient(circle,#fef08a,#facc15);box-shadow:0 0 40px 20px rgba(253,224,71,.4),0 0 80px 40px rgba(253,224,71,.15)}
+#celestial.moon{background:radial-gradient(circle at 35% 35%,#e2e8f0,#94a3b8);box-shadow:0 0 30px 10px rgba(148,163,184,.3)}
+
+/* FLOATING CLOUDS */
+.cloud{position:fixed;border-radius:50px;background:rgba(255,255,255,.12);pointer-events:none;animation:driftCloud linear infinite}
+@keyframes driftCloud{from{transform:translateX(-200px)}to{transform:translateX(calc(100vw + 200px))}}
+
+/* PARTICLES */
+#particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:hidden}
+.particle{position:absolute;border-radius:50%;pointer-events:none;animation:floatUp var(--dur,3s) ease-out forwards}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-120px) scale(0)}}
+
+/* WRAPPER */
+.wrap{max-width:700px;margin:0 auto;padding:1.5rem 1rem 5rem;position:relative;z-index:10}
+
+/* INTRO SCREEN */
+#intro{text-align:center;padding:3rem 1rem;animation:slideIn .7s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.intro-emoji{font-size:80px;animation:bounce 2s ease-in-out infinite;display:block;margin-bottom:1rem}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
+.intro-title{font-family:'Baloo 2',sans-serif;font-size:clamp(36px,8vw,60px);font-weight:800;line-height:1.1;margin-bottom:.75rem;background:linear-gradient(135deg,#fff 30%,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.intro-sub{font-size:16px;color:var(--text2);margin-bottom:2.5rem;line-height:1.6;max-width:420px;margin-left:auto;margin-right:auto}
+.start-btn{display:inline-block;padding:18px 50px;background:linear-gradient(135deg,#8b5cf6,#ec4899);border:none;border-radius:50px;font-family:'Baloo 2',sans-serif;font-size:22px;font-weight:700;color:#fff;cursor:pointer;letter-spacing:.02em;box-shadow:0 8px 32px rgba(139,92,246,.5);transition:transform .15s,box-shadow .15s;position:relative;overflow:hidden}
+.start-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,#ec4899,#8b5cf6);opacity:0;transition:opacity .3s}
+.start-btn:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 14px 40px rgba(139,92,246,.65)}
+.start-btn:hover::before{opacity:1}
+.start-btn:active{transform:scale(.97)}
+.start-btn span{position:relative;z-index:1}
+.feature-pills{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:2rem}
+.pill{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--text2);backdrop-filter:blur(10px)}
+
+/* HUD */
+.hud{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.25rem}
+.hud-card{background:var(--card);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:16px;padding:.875rem .875rem;text-align:center;transition:transform .2s}
+.hud-card:hover{transform:translateY(-2px)}
+.hud-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:4px}
+.hud-val{font-family:'Baloo 2',sans-serif;font-size:24px;font-weight:700;line-height:1;transition:all .3s}
+.hud-val.pos{color:var(--red);text-shadow:0 0 20px rgba(249,115,22,.6)}
+.hud-val.neg{color:var(--green);text-shadow:0 0 20px rgba(34,197,94,.6)}
+.hud-val.clk{font-size:14px;padding-top:4px;color:var(--yellow)}
+
+/* PROGRESS */
+.prog-wrap{margin-bottom:1.5rem;background:var(--card);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:16px;padding:1rem 1.25rem}
+.prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.prog-day{font-family:'Baloo 2',sans-serif;font-size:15px;font-weight:700}
+.prog-pct{font-size:12px;color:var(--text3)}
+.prog-track{height:10px;background:rgba(255,255,255,.1);border-radius:5px;overflow:hidden;position:relative}
+.prog-fill{height:100%;border-radius:5px;transition:width .6s cubic-bezier(.34,1.56,.64,1),background .5s;background:linear-gradient(90deg,#22c55e,#86efac);position:relative}
+.prog-fill::after{content:'';position:absolute;top:0;right:0;bottom:0;width:30px;background:rgba(255,255,255,.35);border-radius:5px;animation:shimmer 1.5s ease-in-out infinite}
+@keyframes shimmer{0%,100%{opacity:.5}50%{opacity:1}}
+.day-dots{display:flex;gap:5px;margin-top:10px;flex-wrap:wrap}
+.day-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.15);transition:all .3s;flex-shrink:0}
+.day-dot.done{background:var(--green);box-shadow:0 0 6px rgba(34,197,94,.6)}
+.day-dot.active{background:var(--yellow);box-shadow:0 0 8px rgba(253,224,71,.7);animation:pulseDot 1s ease-in-out infinite alternate}
+@keyframes pulseDot{from{transform:scale(1)}to{transform:scale(1.4)}}
+
+/* PHASE HEADER */
+.phase-head{margin-bottom:1rem;animation:fadeSlide .4s ease}
+@keyframes fadeSlide{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:translateX(0)}}
+.phase-row{display:flex;align-items:center;gap:10px;margin-bottom:.5rem;flex-wrap:wrap}
+.phase-chip{background:linear-gradient(135deg,rgba(139,92,246,.4),rgba(236,72,153,.3));border:1px solid rgba(167,139,250,.4);border-radius:20px;padding:4px 14px;font-size:11px;font-weight:700;color:#c4b5fd;text-transform:uppercase;letter-spacing:.08em;backdrop-filter:blur(10px)}
+.phase-time-badge{background:rgba(253,224,71,.15);border:1px solid rgba(253,224,71,.3);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700;color:var(--yellow)}
+.phase-q{font-family:'Baloo 2',sans-serif;font-size:clamp(17px,4vw,22px);font-weight:700;line-height:1.3;color:#fff}
+
+/* CHOICES */
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:1.25rem}
+.choice{
+  background:var(--card);backdrop-filter:blur(16px);
+  border:1px solid var(--border);border-radius:18px;
+  padding:1.125rem 1.125rem 1rem;cursor:pointer;
+  transition:transform .18s cubic-bezier(.34,1.56,.64,1),border-color .15s,background .15s,box-shadow .15s;
+  position:relative;overflow:hidden;
+  animation:cardIn .35s ease both
+}
+.choice:nth-child(1){animation-delay:.05s}
+.choice:nth-child(2){animation-delay:.1s}
+.choice:nth-child(3){animation-delay:.15s}
+.choice:nth-child(4){animation-delay:.2s}
+@keyframes cardIn{from{opacity:0;transform:translateY(20px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+.choice::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;border-radius:18px}
+.choice.burn-c::before{background:linear-gradient(135deg,rgba(34,197,94,.12),rgba(16,185,129,.08))}
+.choice.gain-c::before{background:linear-gradient(135deg,rgba(249,115,22,.12),rgba(239,68,68,.08))}
+.choice:hover{transform:translateY(-4px) scale(1.02);border-color:var(--border2);box-shadow:0 12px 40px rgba(0,0,0,.3)}
+.choice:hover::before{opacity:1}
+.choice:active{transform:scale(.97)}
+.choice.selected{border-color:#a78bfa;box-shadow:0 0 0 2px rgba(167,139,250,.4),0 8px 32px rgba(0,0,0,.3)}
+.choice-icon{font-size:32px;margin-bottom:.5rem;display:block;transition:transform .2s}
+.choice:hover .choice-icon{transform:scale(1.2) rotate(-5deg)}
+.choice-name{font-family:'Baloo 2',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px;line-height:1.2}
+.choice-desc{font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.45}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px}
+.badge-burn{background:var(--greenb);color:var(--green);border:1px solid var(--greenbr)}
+.badge-gain{background:var(--redb);color:var(--red);border:1px solid var(--redbr)}
+.badge-neut{background:rgba(255,255,255,.08);color:var(--text3);border:1px solid var(--border)}
+
+/* CALORIE METER */
+.cal-meter{background:var(--card);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:16px;padding:1rem 1.25rem;margin-bottom:1.25rem}
+.meter-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.meter-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em}
+.meter-net{font-family:'Baloo 2',sans-serif;font-size:16px;font-weight:700}
+.meter-track{height:12px;background:rgba(255,255,255,.08);border-radius:6px;overflow:hidden;position:relative}
+.meter-fill{height:100%;border-radius:6px;transition:width .6s cubic-bezier(.34,1.56,.64,1),background .5s;min-width:4px}
+
+/* LOG */
+.log-box{background:var(--card);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:16px;padding:.875rem 1rem;margin-bottom:1.25rem;max-height:140px;overflow-y:auto}
+.log-box::-webkit-scrollbar{width:3px}
+.log-box::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.log-row{display:flex;align-items:center;gap:8px;font-size:12px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.06);line-height:1.4}
+.log-row:last-child{border-bottom:none}
+.log-t{color:var(--text3);white-space:nowrap;font-size:11px}
+.log-n{color:var(--text2);flex:1}
+.log-burn{color:var(--green);font-weight:700;white-space:nowrap}
+.log-gain{color:var(--red);font-weight:700;white-space:nowrap}
+.log-empty{font-size:12px;color:var(--text3);font-style:italic;text-align:center;padding:.5rem 0}
+
+/* TOAST */
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(15,10,30,.9);backdrop-filter:blur(20px);border:1px solid var(--border2);border-radius:50px;padding:10px 24px;font-size:14px;font-weight:700;color:#fff;opacity:0;transition:all .3s;z-index:100;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* STREAK */
+.streak-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(253,224,71,.15);border:1px solid rgba(253,224,71,.3);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700;color:var(--yellow);margin-left:auto}
+
+/* END SCREEN */
+#end-screen{display:none;animation:endIn .6s cubic-bezier(.34,1.56,.64,1)}
+@keyframes endIn{from{opacity:0;transform:scale(.9) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.end-card{background:var(--card);backdrop-filter:blur(24px);border:1px solid var(--border2);border-radius:24px;padding:2.5rem 1.75rem;text-align:center;position:relative;overflow:hidden}
+.end-card::before{content:'';position:absolute;inset:-1px;border-radius:24px;background:linear-gradient(135deg,rgba(167,139,250,.2),rgba(236,72,153,.15),rgba(34,197,94,.1));z-index:-1}
+.end-emoji{font-size:70px;display:block;margin-bottom:.75rem;animation:bigBounce .8s cubic-bezier(.34,1.56,.64,1)}
+@keyframes bigBounce{0%{transform:scale(0) rotate(-20deg)}60%{transform:scale(1.2) rotate(5deg)}100%{transform:scale(1) rotate(0)}}
+.end-grade{font-family:'Baloo 2',sans-serif;font-size:clamp(28px,7vw,44px);font-weight:800;margin-bottom:.5rem}
+.end-msg{font-size:15px;color:var(--text2);margin-bottom:2rem;line-height:1.6;max-width:400px;margin-left:auto;margin-right:auto}
+.end-hud{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.75rem}
+.end-log{background:rgba(0,0,0,.2);border-radius:14px;padding:.875rem 1rem;max-height:180px;overflow-y:auto;text-align:left;margin-bottom:1.75rem}
+.restart-btn{display:inline-block;padding:16px 44px;background:linear-gradient(135deg,#8b5cf6,#ec4899);border:none;border-radius:50px;font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:700;color:#fff;cursor:pointer;box-shadow:0 8px 32px rgba(139,92,246,.5);transition:transform .15s,box-shadow .15s}
+.restart-btn:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 14px 40px rgba(139,92,246,.7)}
+.share-note{margin-top:1rem;font-size:12px;color:var(--text3)}
+.tip-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:1.5rem}
+.tip{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:12px;padding:6px 14px;font-size:12px;color:var(--text3)}
+
+/* SCORE PULSE */
+@keyframes scorePop{0%{transform:scale(1)}30%{transform:scale(1.35)}100%{transform:scale(1)}}
+.pop{animation:scorePop .35s cubic-bezier(.34,1.56,.64,1)}
+
+/* RESPONSIVE */
+@media(max-width:480px){
+  .hud{grid-template-columns:repeat(2,1fr)}
+  .choices{grid-template-columns:1fr}
+  .end-hud{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body class="night">
+
+<div id="stars"></div>
+<div id="celestial" class="moon"></div>
+<div id="particles"></div>
+
+<div class="wrap">
+  <!-- INTRO -->
+  <div id="intro">
+    <span class="intro-emoji">🏃</span>
+    <h1 class="intro-title">Calorie Quest</h1>
+    <p class="intro-sub">Live your entire day — from morning yoga to bedtime. Every choice burns or gains calories. Can you end the day in the green?</p>
+    <button class="start-btn" onclick="startGame()"><span>▶ Start Your Day</span></button>
+    <div class="feature-pills">
+      <span class="pill">🌅 13 phases of your day</span>
+      <span class="pill">🔥 Real calorie tracking</span>
+      <span class="pill">🌙 Live sky animation</span>
+      <span class="pill">🏆 Get your daily grade</span>
+    </div>
+  </div>
+
+  <!-- GAME -->
+  <div id="game" style="display:none">
+    <div class="hud">
+      <div class="hud-card">
+        <div class="hud-lbl">Net Cal</div>
+        <div class="hud-val" id="h-net">0</div>
+      </div>
+      <div class="hud-card">
+        <div class="hud-lbl">🔥 Burned</div>
+        <div class="hud-val neg" id="h-burn">0</div>
+      </div>
+      <div class="hud-card">
+        <div class="hud-lbl">🍕 Gained</div>
+        <div class="hud-val pos" id="h-gain">0</div>
+      </div>
+      <div class="hud-card">
+        <div class="hud-lbl">🕐 Time</div>
+        <div class="hud-val clk" id="h-time">6:00 AM</div>
+      </div>
+    </div>
+
+    <div class="prog-wrap">
+      <div class="prog-top">
+        <span class="prog-day" id="prog-day">Morning</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="streak-badge" id="streak-badge" style="display:none">🔥 <span id="streak-num">0</span> streak</span>
+          <span class="prog-pct" id="prog-pct">0%</span>
+        </div>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="day-dots" id="day-dots"></div>
+    </div>
+
+    <div class="cal-meter">
+      <div class="meter-top">
+        <span class="meter-label">Calorie balance</span>
+        <span class="meter-net" id="meter-net">Balanced ✨</span>
+      </div>
+      <div class="meter-track"><div class="meter-fill" id="meter-fill" style="width:50%;background:linear-gradient(90deg,#22c55e,#86efac)"></div></div>
+    </div>
+
+    <div class="phase-head" id="phase-head">
+      <div class="phase-row">
+        <span class="phase-chip" id="p-chip">Morning</span>
+        <span class="phase-time-badge" id="p-time">6:00 AM</span>
+      </div>
+      <div class="phase-q" id="p-q">Rise and shine!</div>
+    </div>
+
+    <div class="choices" id="choices"></div>
+
+    <div class="log-box" id="log-box">
+      <div class="log-empty">Your activity log appears here...</div>
+    </div>
+  </div>
+
+  <!-- END -->
+  <div id="end-screen"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const PHASES=[
+  {label:"Morning",time:"6:00 AM",sky:"night",q:"Rise and shine — how do you kick off your morning?",choices:[
+    {e:"🧘",n:"Yoga + stretching",d:"30 min morning yoga flow",cal:-180,t:"burn"},
+    {e:"🏃",n:"Morning run",d:"20 min jog in the park",cal:-220,t:"burn"},
+    {e:"🛏️",n:"Hit snooze again",d:"Scrolling in bed… again",cal:30,t:"gain"},
+    {e:"🚶",n:"Brisk morning walk",d:"15 min fresh air walk",cal:-100,t:"burn"},
+  ]},
+  {label:"Morning",time:"6:45 AM",sky:"dawn",q:"Time to freshen up — what's your routine?",choices:[
+    {e:"🪥",n:"Full routine",d:"Brush, shower, stretch ritual",cal:-40,t:"burn"},
+    {e:"🚿",n:"Quick shower only",d:"Fast refresh, skip rest",cal:-15,t:"burn"},
+    {e:"😴",n:"Barely brush",d:"Two minutes and out",cal:0,t:"neut"},
+  ]},
+  {label:"Breakfast",time:"7:30 AM",sky:"dawn",q:"What's fuelling you this morning?",choices:[
+    {e:"🥣",n:"Oats + fruit bowl",d:"Fibrous, filling, healthy start",cal:280,t:"gain"},
+    {e:"🍳",n:"Eggs + wheat toast",d:"Protein-rich balanced meal",cal:320,t:"gain"},
+    {e:"🧁",n:"Pastry + coffee",d:"Sugary start, energy crash soon",cal:520,t:"gain"},
+    {e:"⏩",n:"Skip breakfast",d:"Rushed out the door",cal:0,t:"neut"},
+  ]},
+  {label:"Commute",time:"8:30 AM",sky:"morning",q:"How are you getting to work today?",choices:[
+    {e:"🚇",n:"Metro + walking",d:"Walk to station, ride metro",cal:-90,t:"burn"},
+    {e:"🚌",n:"Bus ride",d:"Seated journey, short walk",cal:-30,t:"burn"},
+    {e:"🚕",n:"Cab door-to-door",d:"Comfortable, zero effort",cal:10,t:"gain"},
+    {e:"🚴",n:"Cycle to office",d:"30 min energetic bike ride",cal:-250,t:"burn"},
+  ]},
+  {label:"Market",time:"9:00 AM",sky:"morning",q:"Quick stop — do you grab fresh groceries?",choices:[
+    {e:"🥦",n:"Fruit & veg market",d:"Walk around, carry produce",cal:-60,t:"burn"},
+    {e:"📱",n:"Order online delivery",d:"Tap and wait, zero steps",cal:5,t:"gain"},
+    {e:"⏭️",n:"Skip the errand",d:"Head straight to work",cal:0,t:"neut"},
+  ]},
+  {label:"Office",time:"10:00 AM",sky:"morning",q:"Morning work session — what's your style?",choices:[
+    {e:"🪑",n:"Desk all morning",d:"Barely move for 3 hours",cal:20,t:"gain"},
+    {e:"🚶",n:"Walking meeting",d:"Discuss project on a walk",cal:-80,t:"burn"},
+    {e:"🧗",n:"Stairs everywhere",d:"Elevator? Never heard of it",cal:-50,t:"burn"},
+    {e:"💻",n:"Standing desk",d:"On feet while working",cal:-35,t:"burn"},
+  ]},
+  {label:"Lunch",time:"1:00 PM",sky:"afternoon",q:"Lunch break — what are you eating?",choices:[
+    {e:"🥗",n:"Salad + dal + roti",d:"Balanced desi home-style meal",cal:380,t:"gain"},
+    {e:"🍔",n:"Burger + fries",d:"Fast food treat today",cal:750,t:"gain"},
+    {e:"🍱",n:"Home tiffin",d:"Healthy dal-rice from home",cal:400,t:"gain"},
+    {e:"🍕",n:"Pizza + soda",d:"Quick slice from canteen",cal:680,t:"gain"},
+  ]},
+  {label:"Afternoon",time:"1:45 PM",sky:"afternoon",q:"After lunch — 15 spare minutes",choices:[
+    {e:"🚶",n:"Post-lunch stroll",d:"Walk around the block",cal:-70,t:"burn"},
+    {e:"😴",n:"Nap at desk",d:"Head down, siesta mode",cal:25,t:"gain"},
+    {e:"📱",n:"Scroll social media",d:"Seated, very very still",cal:10,t:"gain"},
+  ]},
+  {label:"Office",time:"3:00 PM",sky:"afternoon",q:"Afternoon slump — how do you push through?",choices:[
+    {e:"☕",n:"Coffee + biscuits",d:"Caffeine + sugar combo",cal:130,t:"gain"},
+    {e:"🥜",n:"Nuts + green tea",d:"Smart snack, steady energy",cal:90,t:"gain"},
+    {e:"💧",n:"Water + desk stretch",d:"Hydrate and stretch it out",cal:-20,t:"burn"},
+    {e:"🍫",n:"Chocolate bar",d:"A full sugar hit",cal:220,t:"gain"},
+  ]},
+  {label:"Return",time:"6:30 PM",sky:"evening",q:"Heading home — how?",choices:[
+    {e:"🚇",n:"Metro + walk home",d:"Walk from the station",cal:-80,t:"burn"},
+    {e:"🚕",n:"Cab straight home",d:"Comfortable ride back",cal:10,t:"gain"},
+    {e:"🚶",n:"Walk most of the way",d:"Get off early, walk rest",cal:-130,t:"burn"},
+  ]},
+  {label:"Evening",time:"7:30 PM",sky:"evening",q:"Evening free time — what's the vibe?",choices:[
+    {e:"🏋️",n:"Gym session",d:"45 min strength + cardio",cal:-350,t:"burn"},
+    {e:"🧘",n:"Evening yoga",d:"Calm down with 30 min yoga",cal:-150,t:"burn"},
+    {e:"📺",n:"Netflix on couch",d:"Very horizontal, very still",cal:40,t:"gain"},
+    {e:"🌳",n:"Park walk",d:"Leisurely evening stroll",cal:-120,t:"burn"},
+  ]},
+  {label:"Dinner",time:"8:30 PM",sky:"night",q:"Dinner time — what's on the plate?",choices:[
+    {e:"🥘",n:"Dal + sabzi + roti",d:"Light nutritious home meal",cal:420,t:"gain"},
+    {e:"🍛",n:"Rich biryani + raita",d:"A proper feast tonight",cal:680,t:"gain"},
+    {e:"🥗",n:"Salad + soup",d:"Light dinner, great choice",cal:200,t:"gain"},
+    {e:"🍜",n:"Instant noodles",d:"Quick, salty, processed",cal:380,t:"gain"},
+  ]},
+  {label:"Bedtime",time:"10:00 PM",sky:"night",q:"Before bed — winding down...",choices:[
+    {e:"📚",n:"Read a book",d:"Relaxed screen-free night",cal:-10,t:"neut"},
+    {e:"📱",n:"Phone till midnight",d:"Blue light, late night",cal:15,t:"gain"},
+    {e:"🚶",n:"10-min night stroll",d:"Brief nighttime walk",cal:-40,t:"burn"},
+    {e:"🧘",n:"Meditation + sleep",d:"Early to bed, well rested",cal:-20,t:"burn"},
+  ]},
+];
+
+let phase=0,burned=0,gained=0,log=[],goodStreak=0,bestStreak=0;
+function net(){return gained-burned}
+
+// STARS
+function makeStars(){
+  const c=document.getElementById("stars");
+  c.innerHTML="";
+  for(let i=0;i<120;i++){
+    const s=document.createElement("div");
+    s.className="star";
+    const sz=Math.random()*2.5+1;
+    s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${(Math.random()*2+1).toFixed(1)}s;animation-delay:${(Math.random()*3).toFixed(1)}s`;
+    c.appendChild(s);
+  }
+}
+
+// CLOUDS
+function makeClouds(){
+  ["morning","dawn"].forEach(sky=>{
+    for(let i=0;i<3;i++){
+      const cl=document.createElement("div");
+      cl.className="cloud";
+      const h=Math.random()*40+10;
+      const w=Math.random()*120+80;
+      const top=Math.random()*35+5;
+      const dur=Math.random()*30+25;
+      cl.style.cssText=`width:${w}px;height:${h}px;top:${top}%;animation-duration:${dur}s;animation-delay:-${Math.random()*dur}s;opacity:.5`;
+      document.body.appendChild(cl);
+    }
+  });
+}
+
+// CELESTIAL
+function updateSky(skyKey){
+  const body=document.body;
+  body.className=skyKey||"night";
+  const cel=document.getElementById("celestial");
+  if(skyKey==="morning"||skyKey==="afternoon"){
+    cel.className="sun";
+    cel.style.top="50px";
+  } else if(skyKey==="dawn"||skyKey==="evening"){
+    cel.className="sun";
+    cel.style.top="80px";
+    cel.style.opacity=".7";
+  } else {
+    cel.className="moon";
+    cel.style.opacity="1";
+  }
+}
+
+// PARTICLES
+function burst(x,y,type){
+  const container=document.getElementById("particles");
+  const colors=type==="burn"?["#22c55e","#86efac","#4ade80"]:type==="gain"?["#f97316","#fb923c","#fde047"]:["#a78bfa","#c4b5fd"];
+  for(let i=0;i<12;i++){
+    const p=document.createElement("div");
+    p.className="particle";
+    const sz=Math.random()*8+4;
+    const angle=Math.random()*360;
+    const dist=Math.random()*60+20;
+    const px=x+Math.cos(angle*Math.PI/180)*dist;
+    const py=y+Math.sin(angle*Math.PI/180)*dist;
+    p.style.cssText=`width:${sz}px;height:${sz}px;left:${px}px;top:${py}px;background:${colors[Math.floor(Math.random()*colors.length)]};--dur:${(Math.random()*1+.8).toFixed(1)}s`;
+    container.appendChild(p);
+    setTimeout(()=>p.remove(),2000);
+  }
+}
+
+// TOAST
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove("show"),2200);
+}
+
+// HUD DOTS
+function makeDots(){
+  const c=document.getElementById("day-dots");
+  c.innerHTML="";
+  PHASES.forEach((_,i)=>{
+    const d=document.createElement("div");
+    d.className="day-dot"+(i<phase?" done":i===phase?" active":"");
+    c.appendChild(d);
+  });
+}
+
+function updateHUD(){
+  const n=net();
+  const el=document.getElementById("h-net");
+  el.textContent=(n>=0?"+":"")+n;
+  el.className="hud-val "+(n>0?"pos":n<0?"neg":"");
+  document.getElementById("h-burn").textContent=burned;
+  document.getElementById("h-gain").textContent=gained;
+  const pct=Math.round((phase/PHASES.length)*100);
+  document.getElementById("prog-fill").style.width=pct+"%";
+  document.getElementById("prog-fill").style.background=
+    n>400?"linear-gradient(90deg,#f97316,#ef4444)":
+    n>150?"linear-gradient(90deg,#fbbf24,#f97316)":
+    "linear-gradient(90deg,#22c55e,#86efac)";
+  document.getElementById("prog-pct").textContent=pct+"%";
+  // meter
+  const pctMeter=Math.min(Math.max(50+(n/20),5),95);
+  document.getElementById("meter-fill").style.width=pctMeter+"%";
+  document.getElementById("meter-fill").style.background=
+    n>300?"linear-gradient(90deg,#f97316,#ef4444)":
+    n>0?"linear-gradient(90deg,#fbbf24,#f97316)":
+    "linear-gradient(90deg,#22c55e,#86efac)";
+  const mnet=document.getElementById("meter-net");
+  if(n<-200)mnet.textContent="Superb! 🏆";
+  else if(n<0)mnet.textContent="Burning strong 🔥";
+  else if(n<200)mnet.textContent="Balanced ✨";
+  else if(n<400)mnet.textContent="Watch it... ⚠️";
+  else mnet.textContent="Too many calories! 😅";
+  makeDots();
+  if(goodStreak>=2){
+    document.getElementById("streak-badge").style.display="inline-flex";
+    document.getElementById("streak-num").textContent=goodStreak;
+  }
+}
+
+function renderPhase(){
+  if(phase>=PHASES.length){showEnd();return}
+  const p=PHASES[phase];
+  updateSky(p.sky);
+  document.getElementById("p-chip").textContent=p.label;
+  document.getElementById("p-time").textContent=p.time;
+  document.getElementById("h-time").textContent=p.time;
+  document.getElementById("p-q").textContent=p.q;
+  document.getElementById("prog-day").textContent=p.label;
+  // re-animate header
+  const ph=document.getElementById("phase-head");
+  ph.style.animation="none";ph.offsetHeight;ph.style.animation="fadeSlide .4s ease";
+  const grid=document.getElementById("choices");
+  grid.innerHTML="";
+  p.choices.forEach((c,i)=>{
+    const card=document.createElement("div");
+    card.className="choice "+(c.t==="burn"?"burn-c":c.t==="gain"?"gain-c":"");
+    const bLabel=c.t==="burn"?"−"+Math.abs(c.cal)+" kcal burned":c.t==="gain"?"+"+c.cal+" kcal gained":"Neutral";
+    const bClass=c.t==="burn"?"badge-burn":c.t==="gain"?"badge-gain":"badge-neut";
+    card.innerHTML=`<span class="choice-icon">${c.e}</span><div class="choice-name">${c.n}</div><div class="choice-desc">${c.d}</div><span class="badge ${bClass}">${bLabel}</span>`;
+    card.addEventListener("click",(ev)=>pick(i,ev));
+    grid.appendChild(card);
+  });
+}
+
+function pick(idx,ev){
+  const p=PHASES[phase];
+  const c=p.choices[idx];
+  // particle burst
+  const rect=ev.currentTarget.getBoundingClientRect();
+  burst(rect.left+rect.width/2,rect.top+rect.height/2,c.t);
+  // mark selected
+  ev.currentTarget.classList.add("selected");
+  if(c.t==="burn"){
+    burned+=Math.abs(c.cal);
+    goodStreak++;
+    if(goodStreak>bestStreak)bestStreak=goodStreak;
+    const msgs=["Great move! 💪","Keep burning! 🔥","You're on fire! 🏃","Healthy choice! 🌿","Body loves this! ✨"];
+    showToast(msgs[Math.floor(Math.random()*msgs.length)]+" −"+Math.abs(c.cal)+" kcal");
+  } else if(c.t==="gain"){
+    gained+=c.cal;
+    if(c.cal>500){goodStreak=0;showToast("Ooh that's heavy! 😬 +"+c.cal+" kcal");}
+    else if(c.cal>350){showToast("Indulging a bit! 🍕 +"+c.cal+" kcal");}
+    else showToast("Calories in! 🍽️ +"+c.cal+" kcal");
+  } else {
+    showToast("Neutral — no change 😐");
+  }
+  const tag=c.t==="burn"?"−"+Math.abs(c.cal)+" kcal":c.t==="gain"?"+"+c.cal+" kcal":"neutral";
+  log.unshift({time:p.time,name:c.e+" "+c.n,tag,cls:c.t==="burn"?"log-burn":c.t==="gain"?"log-gain":""});
+  updateLog();
+  // pop HUD
+  const hv=document.getElementById("h-net");
+  hv.classList.remove("pop");hv.offsetHeight;hv.classList.add("pop");
+  setTimeout(()=>hv.classList.remove("pop"),400);
+  phase++;
+  updateHUD();
+  setTimeout(()=>{
+    if(phase>=PHASES.length)showEnd();
+    else renderPhase();
+  },320);
+}
+
+function updateLog(){
+  const box=document.getElementById("log-box");
+  if(!log.length){box.innerHTML='<div class="log-empty">Your activity log appears here...</div>';return}
+  box.innerHTML=log.map(e=>`<div class="log-row"><span class="log-t">${e.time}</span><span class="log-n">${e.name}</span><span class="${e.cls}">${e.tag}</span></div>`).join("");
+}
+
+function showEnd(){
+  document.getElementById("game").style.display="none";
+  document.getElementById("log-box").style.display="none";
+  const n=net();
+  let emoji,grade,msg,color;
+  if(n<-300){emoji="🏆";grade="Champion!";msg="You absolutely dominated today. Every choice was intentional, active, and healthy. Your body is thriving!";color="#22c55e";}
+  else if(n<0){emoji="🌟";grade="Great Day!";msg="A well-balanced day with good active choices. You burned more than you gained — that's a win!";color="#4ade80";}
+  else if(n<300){emoji="👍";grade="Not Bad!";msg="A decent day overall. A few more active choices and less snacking would have pushed you into the green!";color="#fbbf24";}
+  else if(n<600){emoji="😐";grade="Could Be Better";msg="Too much sitting and a few indulgent meals tipped the balance. Tomorrow is a new chance — make it count!";color="#f97316";}
+  else{emoji="😅";grade="Oops!";msg="That was a heavy day! Way more calories gained than burned. Your body is asking for some movement tomorrow!";color="#ef4444";}
+  const endDiv=document.getElementById("end-screen");
+  endDiv.style.display="block";
+  endDiv.innerHTML=`
+  <div class="end-card">
+    <span class="end-emoji">${emoji}</span>
+    <div class="end-grade" style="color:${color}">${grade}</div>
+    <div class="end-msg">${msg}</div>
+    <div class="end-hud">
+      <div class="hud-card"><div class="hud-lbl">Net Cal</div><div class="hud-val" style="color:${color};font-size:20px">${n>=0?"+":""}${n}</div></div>
+      <div class="hud-card"><div class="hud-lbl">🔥 Burned</div><div class="hud-val neg" style="font-size:20px">${burned}</div></div>
+      <div class="hud-card"><div class="hud-lbl">🍕 Gained</div><div class="hud-val pos" style="font-size:20px">${gained}</div></div>
+    </div>
+    ${bestStreak>=2?`<div style="background:rgba(253,224,71,.1);border:1px solid rgba(253,224,71,.25);border-radius:12px;padding:.75rem 1rem;margin-bottom:1.25rem;font-size:14px;color:#fde047">🔥 Best active streak: <strong>${bestStreak} healthy choices in a row!</strong></div>`:""}
+    <div class="end-log">
+      ${log.map(e=>`<div class="log-row"><span class="log-t">${e.time}</span><span class="log-n">${e.name}</span><span class="${e.cls}">${e.tag}</span></div>`).join("")}
+    </div>
+    <button class="restart-btn" onclick="restart()">↺ Play Again</button>
+    <div class="share-note">Share this game with friends and see who lives healthier! 💪</div>
+    <div class="tip-row">
+      <span class="tip">💡 Cycle to work burns 250 kcal</span>
+      <span class="tip">💡 Post-lunch walk aids digestion</span>
+      <span class="tip">💡 Oats breakfast = smart fuel</span>
+    </div>
+  </div>`;
+}
+
+function startGame(){
+  document.getElementById("intro").style.display="none";
+  document.getElementById("game").style.display="block";
+  makeStars();makeClouds();
+  updateHUD();renderPhase();
+}
+
+function restart(){
+  phase=0;burned=0;gained=0;log=[];goodStreak=0;bestStreak=0;
+  document.getElementById("end-screen").style.display="none";
+  document.getElementById("game").style.display="block";
+  document.getElementById("log-box").style.display="block";
+  document.getElementById("streak-badge").style.display="none";
+  updateLog();updateHUD();renderPhase();
+}
+
+makeStars();
+</script>
+</body>
+</html>
